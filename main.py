@@ -15,14 +15,13 @@ class SpellServer(resource.Resource):
         request_dict = json.load(request.content)
 
         result = self.process_query(request_dict)        
-        if type(result) == str:
-            return result
-        else:
-            def fx(x):
-                return x
-            result.addCallback(lambda x:request.write(fx(x)))
-            result.addCallback(lambda x:request.finish())
-            return server.NOT_DONE_YET
+        
+        #result.addCallback(lambda x:request.write(fx(x)))
+        #
+        
+        result.addCallback(lambda x:request.write(json.dumps(x)))
+        result.addCallback(lambda x:request.finish())      
+        return server.NOT_DONE_YET
         
     def process_query(self, request_dict):
         spell = spelling.Spelling(request_dict)

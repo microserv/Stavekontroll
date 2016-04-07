@@ -1,5 +1,7 @@
 import client
 import norvig_spellcheck
+from twisted.internet.defer import DeferredList
+import json
 
 def index_frequencies():
     indexquery = {'Frequencies_tempquery':'abcdefgh'}
@@ -30,11 +32,33 @@ class Spelling(object):
     def generic_spell(self):
         #NOT_IMPLEMENTED
         return self.search_spell()
+ 
+ 
+    def complete(self, RF):
+        result_s = RF[0][1]
+        frequency_s = RF[1][1]
+        
+        result = json.loads(result_s)
+        frequency = json.loads(frequency_s)
+        L = result['Result']
+        print(L)
+        print(frequency)
+        sorted_results = sorted(L, key=lambda x:frequency.get(x,1), reverse=True)
+        
+        print(sorted_results)
+        return sorted_results
+            
         
     def search_spell(self):
         if self.type.lower() == 'completion':
-            result = index_completion(self.query.lower())
-            #TODO Filter by frequencies
+            d_result = index_completion(self.query.lower())
+            d_freqs = index_frequencies()
+            
+            DL = [d_result, d_freqs]
+            callbacks = DeferredList(DL)
+            callbacks.addCallback(self.complete)
+
+            result = callbacks
             
         elif self.type.lower() == 'correction':
             #get frequency_list
@@ -44,7 +68,7 @@ class Spelling(object):
             #...
             
             #result
-        print(result)
+        print(result)   
         return result
         
         
