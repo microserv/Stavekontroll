@@ -45,4 +45,4 @@ Content-Length: {LEN}
         return d
 
 
-#curl -i -H "Content-Type: application/json" -X POST -d '{"Type":"completion", "Search":true, "Query":"forskr"}' 129.241.229.251:805
+#curl -i -H "Content-Type: application/json" -X POST -d '{"Type":"completion", "Search":true, "Query":"forskr"}' 127.0.0.1:8050
