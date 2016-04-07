@@ -18,10 +18,6 @@ class SpellServer(resource.Resource):
         if type(result) == str:
             return result
         else:
-            #result.addCallback(lambda x:x.factory.idata)
-            result.addCallback(lambda x:x)
-            result.addCallbacks(request.write, log.err)
-            result.addBoth(lambda x:request.finish())
             return server.NOT_DONE_YET
         
     def process_query(self, request_dict):

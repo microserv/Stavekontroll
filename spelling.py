@@ -35,16 +35,18 @@ class Spelling(object):
         if self.type.lower() == 'completion':
             result = index_completion(self.query.lower())
             #TODO Filter by frequencies
-            return result
+            
         elif self.type.lower() == 'correction':
             #get frequency_list
-            freqs = index_frequencies()
+            result = index_frequencies()
              
             #do statistics
             #...
             
             #result
-            return freqs
-            
+        print(result)
+        return result
+        
+        
             
 
