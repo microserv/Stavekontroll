@@ -19,10 +19,8 @@ class SpellServer(resource.Resource):
             return result
         else:
             def fx(x):
-                print(x,dir(x))
                 return x
-            result.addCallback(fx)
-            result.addCallback(lambda x:request.write(result))
+            result.addCallback(lambda x:request.write(fx(x)))
             result.addCallback(lambda x:request.finish())
             return server.NOT_DONE_YET
         

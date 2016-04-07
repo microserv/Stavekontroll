@@ -20,8 +20,9 @@ class BeginningPrinter(Protocol):
             self.remaining -= len(display)
 
     def connectionLost(self, reason):
-        print(self.data)
-        print(dir(self.finished))
+        #print(self.data)
+        #print(dir(self.finished))
+        print('---->',self.finished)
         self.finished.callback(self.data)
 
 def send_query_to_index(query):
@@ -41,7 +42,7 @@ Content-Length: {LEN}
             finished = Deferred()
             response.deliverBody(BeginningPrinter(finished))
             return finished
-        d = d.addCallback(cbRequest)
+        d.addCallback(cbRequest)
         return d
 
 
