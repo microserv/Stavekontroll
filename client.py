@@ -44,3 +44,5 @@ Content-Length: {LEN}
         d = d.addCallback(cbRequest)
         return d
 
+
+#curl -i -H "Content-Type: application/json" -X POST -d '{"Type":"completion", "Search":true, "Query":"forskr"}' 129.241.229.251:805
