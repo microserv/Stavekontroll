@@ -36,7 +36,7 @@ class SpellServer(resource.Resource):
         return result
 
 def _generate_frequencies(src_path, dst_path):
-    with open('corpus/1gram_nob_f1_freq.frk') as f:
+    with open(path.join('corpus', '1gram_nob_f1_freq.frk')) as f:
         s = f.read()
     lines = s.decode('latin1').split('\n')
     lines = [x.lstrip().split(' ',1) for x in lines if x.strip()]
@@ -52,7 +52,7 @@ def _generate_frequencies(src_path, dst_path):
         except:
             print(x)
     '''     
-    with open('corpus/frequencies_buffered.json', 'w') as f:
+    with open(path.join('corpus', 'frequencies_buffered.json'), 'w') as f:
         json.dump(freqs, f)    
     return freqs
 
