@@ -43,13 +43,13 @@ def check_prefix(prefix, keytree):
 
 def index_frequencies():
     indexquery = {'Frequencies_tempquery':'abcdefgh'}
-    d_request = client.send_query_to_index(indexquery)
+    d_request = client.send_query(indexquery, 'http://127.0.0.1:8001/')
     
     return d_request
 
 def index_completion(query):
     indexquery = {'Partial': True, 'Query': query}
-    d_request = client.send_query_to_index(indexquery)
+    d_request = client.send_query(indexquery, 'http://127.0.0.1:8001/')
     
     return d_request
 

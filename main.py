@@ -17,7 +17,7 @@ class SpellServer(resource.Resource):
         
     def render_POST(self, request):
         request_dict = json.load(request.content)
-
+        print(request_dict)
         result = self.process_query(request_dict)        
         
         #result.addCallback(lambda x:request.write(fx(x)))

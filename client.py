@@ -25,7 +25,7 @@ class BeginningPrinter(Protocol):
         print('---->',self.finished)
         self.finished.callback(self.data)
 
-def send_query_to_index(query):
+def send_query(query, host_port):
         indexquery_string = json.dumps(query)
       
         QUERY = """
@@ -37,7 +37,7 @@ Content-Length: {LEN}
 {JSON_STRING}""".strip().replace('\n', '\r\n').format(LEN=len(indexquery_string), 
                                                       JSON_STRING=indexquery_string)
         agent = Agent(reactor)
-        d = agent.request('POST', 'http://127.0.0.1:8001/',None,FileBodyProducer(StringIO(indexquery_string)))
+        d = agent.request('POST', host_port,None,FileBodyProducer(StringIO(indexquery_string)))
         def cbRequest(response):
             finished = Deferred()
             response.deliverBody(BeginningPrinter(finished))
