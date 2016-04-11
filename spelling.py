@@ -42,7 +42,7 @@ def check_prefix(prefix, keytree):
 
 def index_frequencies():
     indexquery = {'Frequencies_tempquery':'abcdefgh'}
-    d_request = client.send_query(indexquery, CONFIG.index_host')
+    d_request = client.send_query(indexquery, CONFIG.index_host)
     
     return d_request
 
