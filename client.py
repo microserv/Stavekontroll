@@ -20,9 +20,6 @@ class BeginningPrinter(Protocol):
             self.remaining -= len(display)
 
     def connectionLost(self, reason):
-        #print(self.data)
-        #print(dir(self.finished))
-        print('---->',self.finished)
         self.finished.callback(self.data)
 
 def send_query(query, host_port):

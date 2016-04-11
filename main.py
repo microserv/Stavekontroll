@@ -14,10 +14,10 @@ class SpellServer(resource.Resource):
         self.freqs = freqs
         #self.keytree = spelling.generate_keytree(freqs)
         self.keytree = keytree
-        
+        print("ONLINE")
+
     def render_POST(self, request):
         request_dict = json.load(request.content)
-        print(request_dict)
         result = self.process_query(request_dict)        
         
         #result.addCallback(lambda x:request.write(fx(x)))
@@ -50,7 +50,7 @@ def _generate_frequencies(src_path, dst_path):
         try: 
             freqs[x[1]] = int(x[0])
         except:
-            print(x)
+            print('??{}'.format(x))
     '''     
     with open(path.join('corpus', 'frequencies_buffered.json'), 'w') as f:
         json.dump(freqs, f)    
@@ -65,7 +65,7 @@ def load_frequencies():
         freqs = _generate_frequencies(src, dst)
     else: 
         print("Loading existing frequencylist...")
-        print("(delete {dst} to regenerate at next launch)".format(dst=dst  ))
+        print("  (delete {dst} to regenerate at next launch)".format(dst=dst  ))
         with open(dst) as f:
             freqs = json.load(f)
     print("Done")
@@ -87,7 +87,6 @@ def load_keytree(freqs):
 if __name__=='__main__':
     freqs = load_frequencies()
     keytree = load_keytree(freqs)
-    
     site=server.Site(SpellServer(freqs,keytree)) 
     reactor.listenTCP(8002,site)
     reactor.run()

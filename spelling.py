@@ -2,6 +2,7 @@ import client
 import norvig_spellcheck
 from twisted.internet.defer import DeferredList
 import json
+import CONFIG
 def generate_keytree(freqdict):
     D = {}
     for word in freqdict:
@@ -21,6 +22,7 @@ def check_prefix(prefix, keytree):
     D = keytree
     d = D
     L = []
+    ex = 0
     for (i,letter) in enumerate(prefix,1):
         letter = letter.lower()
         if letter in d:
@@ -41,13 +43,13 @@ def check_prefix(prefix, keytree):
 
 
 def index_frequencies():
-    indexquery = {'Frequencies_tempquery':'abcdefgh'}
+    indexquery = {'task':'getFrequencyList'}
     d_request = client.send_query(indexquery, CONFIG.index_host)
     
     return d_request
 
 def index_completion(query):
-    indexquery = {'Partial': True, 'Query': query}
+    indexquery = {'task':'getSuggestions', 'word': query}
     d_request = client.send_query(indexquery, CONFIG.index_host)
     
     return d_request
@@ -65,8 +67,15 @@ class Spelling(object):
     def get_frequencies(self):
         return self.server.freqs
         
-    def complete(self, result_list,frequency_dict,lim=10):
-        L = check_prefix(self.query.lower(), self.server.keytree)
+    def complete(self, result_list,frequency_dict,lim=10,keytree=None):
+        if keytree == None:
+            ql = self.query.lower()
+            L = []
+            for key in frequency_dict:
+                if key.lower().startswith(ql):
+                    L.append(key)
+        else:
+            L = check_prefix(self.query.lower(), self.server.keytree)
         frequency = frequency_dict
         sorted_results = sorted(L, key=lambda x:frequency.get(x,1), reverse=True)[:10]        
         return sorted_results
@@ -77,13 +86,14 @@ class Spelling(object):
             
             result = json.loads(result_s)
             frequency_dict = json.loads(frequency_s)
-            result_list = result['Result']
-            
+            result_list = result['suggestions']
             return self.complete(result_list, frequency_dict, 10)
 
 
 
     def correct(self, freqs, query):
+        if type(freqs) != dict:
+          freqs = json.loads(freqs[0][1])
         suggestions = norvig_spellcheck.correct(query, freqs)
         return suggestions
         
@@ -112,7 +122,7 @@ class Spelling(object):
                 if len(self.query) <= self.completion_query_minlen:
                     return []
                 results = freqs.keys()
-                return self.complete(results, freqs, 10)
+                return self.complete(results, freqs, 10, self.server.keytree)
 
             elif self.type.lower() == 'correction':
                 freqs = self.get_frequencies()
