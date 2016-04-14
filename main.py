@@ -96,8 +96,7 @@ def load_keytree(freqs):
 
 if __name__=='__main__':
     freqs = load_frequencies()
-    #keytree = load_keytree(freqs)
-    keytree = {}
+    keytree = load_keytree(freqs)
     site=server.Site(SpellServer(freqs,keytree)) 
     reactor.listenTCP(8002,site)
     reactor.run()
