@@ -5,15 +5,21 @@ from twisted.internet import reactor
 from twisted.internet.protocol import Factory, Protocol
 from twisted.internet.endpoints import TCP4ClientEndpoint
 
-import json
-import spelling
 from os import path
+import json
+
+import spelling
+import CONFIG
+
 class SpellServer(resource.Resource):
     isLeaf = True
     def __init__(self,freqs,keytree):
         self.freqs = freqs
         #self.keytree = spelling.generate_keytree(freqs)
         self.keytree = keytree
+        self.keytree_search = None
+        self.timestamp = 0
+        self.TTL = 60*10 #10 minutes
         print("ONLINE")
 
     def render_POST(self, request):
@@ -34,7 +40,10 @@ class SpellServer(resource.Resource):
         spell = spelling.Spelling(request_dict,self)
         result = spell.spellcheck()
         return result
-
+    
+    def store_index_frequencies(slef):
+        d_freqs.addCallback(spelling.generate_keytree)
+        
 def _generate_frequencies(src_path, dst_path):
     with open(path.join('corpus', '1gram_nob_f1_freq.frk')) as f:
         s = f.read()
@@ -84,12 +93,12 @@ def load_keytree(freqs):
             keytree = json.load(f)
         print("Done")
     return keytree
+
 if __name__=='__main__':
     freqs = load_frequencies()
-    keytree = load_keytree(freqs)
+    #keytree = load_keytree(freqs)
+    keytree = {}
     site=server.Site(SpellServer(freqs,keytree)) 
     reactor.listenTCP(8002,site)
     reactor.run()
-#freqs = load_frequencies()
-#keytree = spelling.generate_keytree(freqs)
 

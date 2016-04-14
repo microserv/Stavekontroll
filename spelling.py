@@ -1,8 +1,11 @@
 import client
 import norvig_spellcheck
-from twisted.internet.defer import DeferredList
+from twisted.internet.defer import DeferredList,Deferred
 import json
+import time
+
 import CONFIG
+
 def generate_keytree(freqdict):
     D = {}
     for word in freqdict:
@@ -42,10 +45,12 @@ def check_prefix(prefix, keytree):
     return L
 
 
-def index_frequencies():
+def index_frequencies(server):
+    print("Fetching frequencies from index")
     indexquery = {'task':'getFrequencyList'}
     d_request = client.send_query(indexquery, CONFIG.index_host)
-    
+    d_request.addCallback(lambda x: (server.__dict__.__setitem__('keytree_search', x),x)[1])
+    server.timestamp = time.time()
     return d_request
 
 def index_completion(query):
@@ -102,7 +107,12 @@ class Spelling(object):
 
         #do search-specific (using article keywords/frequencies) spellcheck
         if USE_INDEX_FOR_SEARCH:
-            d_freqs = index_frequencies()
+            x = (time.time() - self.server.timestamp) < self.server.TTL
+            if self.server.keytree_search and (time.time() - self.server.timestamp) < self.server.TTL: #use cached version if exists and not older than timestamp
+                d_freqs = Deferred()
+                d_freqs.callback(self.server.keytree_search)
+            else:
+                d_freqs = index_frequencies(self.server)
             if self.type.lower() == 'completion':
                 d_result = index_completion(self.query.lower())
                 
