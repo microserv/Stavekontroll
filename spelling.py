@@ -32,6 +32,8 @@ def check_prefix(prefix, keytree):
             ex,d = d[letter]
             #if ex > 0:
             #    L.append(prefix[0:i].lower())
+        else:
+            return []
     if ex > 0:
         L.append(prefix.lower())
     def dfs(d,C):
