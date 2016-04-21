@@ -106,7 +106,10 @@ class Spelling(object):
         
     def spellcheck(self):
         USE_INDEX_FOR_SEARCH = self.is_search
-
+        if self.query.lower() in self.server.stopwords:
+            print('STOPWORD: {}'.format(self.query.lower()))
+            return [self.query.lower()]
+            
         #do search-specific (using article keywords/frequencies) spellcheck
         if USE_INDEX_FOR_SEARCH:
             x = (time.time() - self.server.timestamp) < self.server.TTL

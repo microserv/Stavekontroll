@@ -20,6 +20,10 @@ class SpellServer(resource.Resource):
         self.keytree_search = None
         self.timestamp = 0
         self.TTL = 60*10 #10 minutes
+
+        with open(path.join('nltk_data','corpora','stopwords','norwegian')) as f:
+            self.stopwords = {x.strip() for x in f.readlines()}
+ 
         print("ONLINE")
 
     def render_POST(self, request):
