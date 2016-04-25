@@ -1,5 +1,8 @@
 import comm
 
 comm_host = "http://127.0.0.1:9001"
-index_host = comm.get_service_host('index', comm_host)
+
+index_host = 'http://{}:{}/'.format(comm.get_service_ip('index', comm_host), 8001)
+
+#index_host = "http://127.0.0.1:8001/"
 
