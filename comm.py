@@ -7,7 +7,8 @@ from StringIO import StringIO
 from twisted.web.http_headers import Headers
 from twisted.web.client import Agent, FileBodyProducer
 
-import json
+from urlparse import urljoin
+
 class BeginningPrinter(Protocol):
     def __init__(self, finished):
         self.finished = finished
@@ -22,19 +23,10 @@ class BeginningPrinter(Protocol):
     def connectionLost(self, reason):
         self.finished.callback(self.data)
 
-def send_query(query, host_port):
-        indexquery_string = json.dumps(query)
-      
-        QUERY = """
-POST / HTTP/1.1
-User-Agent: Spellcheck
-Content-Type: application/json
-Content-Length: {LEN}
 
-{JSON_STRING}""".strip().replace('\n', '\r\n').format(LEN=len(indexquery_string), 
-                                                      JSON_STRING=indexquery_string)
+def get_service_host(service, comm_host):
         agent = Agent(reactor)
-        d = agent.request('POST', host_port,None,FileBodyProducer(StringIO(indexquery_string)))
+        d = agent.request('GET', urljoin(comm_host, service),None,None)
         def cbRequest(response):
             finished = Deferred()
             response.deliverBody(BeginningPrinter(finished))
@@ -42,6 +34,3 @@ Content-Length: {LEN}
         d.addCallback(cbRequest)
         return d
 
-
-
-#curl -i -H "Content-Type: application/json" -X POST -d '{"Type":"completion", "Search":true, "Query":"forskr"}' 127.0.0.1:8050
