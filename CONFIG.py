@@ -8,3 +8,7 @@ index_host = 'http://{}:{}/'.format(comm.get_service_ip('index', comm_host), 800
 
 #index_host = "http://127.0.0.1:8001/"
 
+try:
+    from local_config import *
+except ImportError:
+    print('Local settings file not found.')
