@@ -103,6 +103,6 @@ if __name__=='__main__':
     freqs = load_frequencies()
     keytree = load_keytree(freqs)
     site=server.Site(SpellServer(freqs,keytree)) 
-    reactor.listenTCP(8002,site)
+    reactor.listenTCP(CONFIG.SPELL_SERVER_PORT,site)
     reactor.run()
 
