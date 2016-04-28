@@ -58,7 +58,7 @@ def _generate_frequencies(src_path, dst_path):
     
     #minste antall frekvenser i frekvensliste for at ordet skal tas med. 
     #dict vokser ekstremt fort (10MB for LIM=20~) for lave grenser (< 20)
-    LIM = 20
+    LIM = 50
     freqs = {word:int(freq) for freq,word in lines if int(freq) > LIM and not set(word)&symbols}
     '''
     freqs = {}
