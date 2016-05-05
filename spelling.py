@@ -7,6 +7,11 @@ import time
 import CONFIG
 
 def generate_keytree(freqdict):
+    """A recursive structure where each letter maps to a tuple (int, dict_of_letters) 
+       where int=1 if the tree thus far forms a recognized word
+       
+       Dict of letters contains only letters that succeed the current tree of letters
+       """
     D = {}
     for word in freqdict:
         d = D
@@ -22,10 +27,12 @@ def generate_keytree(freqdict):
         current[0] = 1
     return D
 def check_prefix(prefix, keytree):
+    """Recursively look up a prefix in the given keytree, return all completions of prefix"""
     D = keytree
     d = D
     L = []
     ex = 0
+    #scan until prefix
     for (i,letter) in enumerate(prefix,1):
         letter = letter.lower()
         if letter in d:
@@ -35,7 +42,9 @@ def check_prefix(prefix, keytree):
         else:
             return []
     if ex > 0:
+        #prefix is a recognized word
         L.append(prefix.lower())
+    #find matches after prefix
     def dfs(d,C):
         for key in d:
             C2 = C[:] + [key]
@@ -48,6 +57,7 @@ def check_prefix(prefix, keytree):
 
 
 def index_frequencies(server):
+    """Fetch specialized frequencies from index"""
     print("Fetching frequencies from index")
     indexquery = {'task':'getFrequencyList'}
     d_request = client.send_query(indexquery, CONFIG.index_host)
@@ -56,6 +66,7 @@ def index_frequencies(server):
     return d_request
 
 def index_completion(query):
+    """Fetch list of completions for query word from index"""
     indexquery = {'task':'getSuggestions', 'word': query}
     d_request = client.send_query(indexquery, CONFIG.index_host)
     
@@ -70,24 +81,38 @@ class Spelling(object):
 
         self.server = server
         
+        #Minimum length of query for completion to be attempted.
+        #A single letter returns too many results and is far too unspecific.
         self.completion_query_minlen = 3
+
     def get_frequencies(self):
         return self.server.freqs
         
     def complete(self, result_list,frequency_dict,lim=10,keytree=None):
+        """Return a ranked list of completions, given: 
+           a result_list of completions for the query word,
+           a frequency_dict of word:frequency mappings. Either generic local, or specialized from index
+           optionally a limit of words to return,
+           optionally a keytree to speed up completions 
+        """
+        
+        #No keytree, do completion by iterating through all words in frequency_dict
         if keytree == None:
             ql = self.query.lower()
             L = []
             for key in frequency_dict:
                 if key.lower().startswith(ql):
                     L.append(key)
+        #Use keytree to speed up completions
         else:
             L = check_prefix(self.query.lower(), self.server.keytree)
-        frequency = frequency_dict
-        sorted_results = sorted(L, key=lambda x:frequency.get(x,1), reverse=True)[:10]        
+
+        #Sort results by frequency, descending. Slice to return max lim 
+        sorted_results = sorted(L, key=lambda x:frequency_dict.get(x,1), reverse=True)[:10]        
         return sorted_results
 
     def complete_deferreds(self, RF):
+            """Wait for deferreds"""
             result_s = RF[0][1]
             frequency_s = RF[1][1]
             
@@ -99,13 +124,19 @@ class Spelling(object):
 
 
     def correct(self, freqs, query):
+        """Using edit distance, return a list of suggestions for correcting the query word
+           Rank list based on frequencies.
+        """
         if type(freqs) != dict:
           freqs = json.loads(freqs[0][1])
         suggestions = norvig_spellcheck.correct(query, freqs)
         return suggestions
         
     def spellcheck(self):
+        """Main for spellcheck. """
         USE_INDEX_FOR_SEARCH = self.is_search
+
+        #Do not do anything about stopwords
         if self.query.lower() in self.server.stopwords:
             print('STOPWORD: {}'.format(self.query.lower()))
             return [self.query.lower()]

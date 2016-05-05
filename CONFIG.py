@@ -1,5 +1,6 @@
 import comm
 
+#Communicationhost, can be used to retrieve IP-addresses og other hosts (services)
 comm_host = "http://127.0.0.1:9001"
 
 SPELL_SERVER_PORT = 8002
