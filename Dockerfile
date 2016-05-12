@@ -14,4 +14,6 @@ WORKDIR ${BASE_DIR}
 RUN pip install -r requirements.txt
 RUN mv ${BASE_DIR}/local_config.py.example ${BASE_DIR}/local_config.py
 
+ENV SERVICE_NAME spell-check
+
 EXPOSE 80
