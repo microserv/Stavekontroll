@@ -26,6 +26,7 @@ def known(words, NWORDS):
     return set(w for w in words if w in NWORDS)
 
 def correct(word, NWORDS, lim=10):
-    candidates = known([word], NWORDS) or known(edits1(word), NWORDS) or known_edits2(word, NWORDS) or [word]
+    #candidates = known([word], NWORDS) or known(edits1(word), NWORDS) or known_edits2(word, NWORDS) or [word]
+    candidates = known([word], NWORDS) | known(edits1(word), NWORDS) | known_edits2(word, NWORDS) or set([word])
     result = sorted(candidates, key=NWORDS.get,reverse=True)[:lim]
     return result

@@ -119,7 +119,7 @@ def load_keytree(freqs, keytree_outfile='keytree.json'):
 
 if __name__=='__main__':
     freqs = load_frequencies()
-    keytree = load_keytree(freqs, keytree_outfile)
+    keytree = load_keytree(freqs)
     site=server.Site(SpellServer(freqs,keytree)) 
     reactor.listenTCP(CONFIG.SPELL_SERVER_PORT,site)
     reactor.run()

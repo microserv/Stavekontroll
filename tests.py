@@ -8,6 +8,7 @@ import json
 import main
 import spelling
 import CONFIG
+import client
 
 class SPELLCHECK(unittest.TestCase):
     def test_01_load_frequencies(self):
@@ -95,8 +96,7 @@ class SPELLCHECK(unittest.TestCase):
             self.assertEqual(set(expected), set(result))
 
 
-    def ntest_99_EXTENSIVE(self):
-        return True
+    def test_99_EXTENSIVE(self):
         """Test most/all of asynchronous network pipeline. Difficult to test in isolation"""
         freqs = main.load_frequencies(frk_linelist='test_frk.frk', frk_buffered_outfile='test_buffered.json')
         keytree = main.load_keytree(SPELLCHECK.d, 'keytree_test.json')
@@ -115,24 +115,25 @@ class SPELLCHECK(unittest.TestCase):
                 ({'Type':'completion', 'Search':False, 'Query':'sau'}, ['sau']),
                 ({'Type':'completion', 'Search':False, 'Query':'kfzzztksss'}, []),
                 ({'Type':'correction', 'Search':False, 'Query':'kkztt'}, ['katt']),
-                ({'Type':'correction', 'Search':False, 'Query':'appleu'}, ['apple', 'applaus'])
-               ]
+                ({'Type':'correction', 'Search':False, 'Query':'appleu'}, ['apple', 'applaus']),
+                (None,None)]
         url = 'http://127.0.0.1:{}/'.format(CONFIG.SPELL_SERVER_PORT)
+        def check(x,req,expect):
+            x1 = set(json.loads(x))
+            x2 = set(expect)
+            print(x1==x2,x2)
+            self.assertEqual(set(x1),set(x2))
         def f():
-            for req,expected in REQL:
-                print(url)
-                print(req)
-                r = json.loads(requests.post(url, data=json.dumps(req)))
-                if req['Type'] == 'completion':
-                    results = r['results']
-                spell = r['spell']
-                self.assertEqual(set(spell), set(expected))
-    
-        delay = 5
-        print('Starting reactor, calling test in {} seconds'.format(delay))
-        main.reactor.callLater(delay+5, main.reactor.stop)
-        main.reactor.callLater(delay, f)
-        print('s')
+            for req,expect in REQL:
+                if req == None and expect == None:
+                    print('***STOPPING REACTOR IN 4 SECONDS***')
+                    main.reactor.callLater(4,main.reactor.stop)
+                    return True
+                dd = client.send_query(req, url)
+                dd.addCallback(check,req,expect)
+                #dd.addCallback(lambda x: self.assertEqual(set(json.loads(x)), set(expect)))
+                
+        main.reactor.callLater(0, f)
         main.reactor.run()
             
 if __name__ == '__main__':

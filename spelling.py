@@ -75,7 +75,6 @@ def index_completion(query):
 class Spelling(object):
     '''prepare returns a dictionary with the result of the spellcheck'''
     def __init__(self, d,server):
-        print('START')
         self.type = d['Type']
         self.query = d['Query']
         self.is_search = d['Search']
@@ -166,7 +165,7 @@ class Spelling(object):
         else:
             freqs = self.get_frequencies()
             if self.type.lower() == 'completion':
-                if len(self.query) <= self.completion_query_minlen:
+                if len(self.query) < self.completion_query_minlen:
                     return []
                 results = freqs.keys()
                 return self.complete(results, freqs, 10, self.server.keytree)
