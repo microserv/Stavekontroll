@@ -75,6 +75,7 @@ def index_completion(query):
 class Spelling(object):
     '''prepare returns a dictionary with the result of the spellcheck'''
     def __init__(self, d,server):
+        print('START')
         self.type = d['Type']
         self.query = d['Query']
         self.is_search = d['Search']
