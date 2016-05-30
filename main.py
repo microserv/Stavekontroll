@@ -38,6 +38,13 @@ class SpellServer(resource.Resource):
  
         print("ONLINE")
     def render_GET(self, request):
+        origin = 'https://despina.128.no'
+        if request.getHeader('Origin') in CONFIG.ALLOWED_ORIGINS:
+            origin = request.getHeader('Origin')
+
+        request.setHeader('Access-Control-Allow-Origin', origin)
+        request.setHeader('Access-Control-Allow-Methods', 'HEAD, GET, POST, PUT, OPTIONS, PATCH, DELETE')
+        request.setHeader('Access-Control-Allow-Headers', 'Content-Type, api_key, Authorization')
         if '/static/swagger.json' in request.uri:
             with open(path.join('static', 'swagger.json')) as f:
                 s = f.read()
