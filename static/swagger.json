@@ -1,1 +1,64 @@
-{'a':1}
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Spell",
+        "description": "Spelling Microservice",
+        "version": "1.0.0"
+    },
+    "host": "despina.128.no",
+    "schemes": [
+        "http"
+    ],
+    "basePath": "/",
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/spell": {
+            "post": {
+                "summary": "Provide completion or spelling correction suggestions.",
+                "description": "Specify whether completion or correction of query is desired.\n\nGiven a query of a single word, returns a list of suggestions.\n",
+                "parameters": [
+                    {
+                        "name": "Type",
+                        "in": "formData",
+                        "description": "Either 'completion' or 'correction'",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "Query",
+                        "in": "formData",
+                        "description": "A single query word to correct or complete, depending on Type-flag.",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "Search",
+                        "in": "formData",
+                        "description": "Is the spelling correction for a search term? (if yes, specialized frequency lists will be used, rather than generic ones).",
+                        "required": true,
+                        "type": "boolean"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A list of results",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/spelling"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "spelling": {
+            "type": "string",
+            "description": "a single word, a suggestion for completion/correction"
+        }
+    }
+}
