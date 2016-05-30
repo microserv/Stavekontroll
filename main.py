@@ -53,10 +53,15 @@ class SpellServer(resource.Resource):
         result = spell.spellcheck()
         return result
         
-def _generate_frequencies(src_path, dst_path,CODING='latin1'):
+def _generate_frequencies(src_path, dst_path,CODING='latin1', FRKLIM=50):
     """Given a frequency file and a destination, generate a dict of 
-       frequencies and store the buffered version"""
-    with open(path.join('corpus', '1gram_nob_f1_freq.frk')) as f:
+       frequencies and store the buffered version
+       
+       FRKLIM is the minimum frequencies a word must have to be included. Very list-specific.
+       
+       Unlike other the other functions, path is here the full path to the files.
+       """
+    with open(path.join(src_path)) as f:
         s = f.read()
         
     #Ignore lines that contain certain symbols
@@ -67,17 +72,19 @@ def _generate_frequencies(src_path, dst_path,CODING='latin1'):
     #Ignore words with frequencies less than this limit. 
     #The list grows quite quickly with limits lower than 20, requiring relatively much memory (500-1000MB~)
     #and quite a few MB storage space the lower the limit is
-    LIM = 50
+    LIM = FRKLIM
     freqs = {word:int(freq) for freq,word in lines if int(freq) > LIM and not set(word)&symbols}
-
-    with open(path.join('corpus', 'frequencies_buffered.json'), 'w') as f:
+   
+    with open(dst_path, 'w') as f:
         json.dump(freqs, f)    
     return freqs
 
-def load_frequencies():
-    """Load frequencies. Generate them if a buffered version does not exist."""
-    src = path.join('corpus', '1gram_nob_f1_freq.frk')
-    dst = path.join('corpus', 'frequencies_buffered.json')
+def load_frequencies(frk_linelist='1gram_nob_f1_freq.frk', frk_buffered_outfile='frequencies_buffered.json'):
+    """Load frequencies. Generate them if a buffered version does not exist.
+       All files are located in the 'corpus' directory, do not include 'corpus' in the path
+    """
+    src = path.join('corpus', frk_linelist)
+    dst = path.join('corpus', frk_buffered_outfile)
     if not path.exists(dst):
         print("Generating frequencylist for first time launch")
         print("...")
@@ -90,11 +97,13 @@ def load_frequencies():
     print("Done")
     return freqs
     
-def load_keytree(freqs):
+def load_keytree(freqs, keytree_outfile='keytree.json'):
     """Load or generate keytree. 
-       This speeds up lookings of frequencies by a lot, but also uses quite a bi of memory"""
+       This speeds up lookups of frequencies by a lot, but also uses quite a bit of memory
+       All files are located in the 'corpus' directory, do not include 'corpus' in the path
+       """
     
-    dst = path.join('corpus', 'keytree.json')
+    dst = path.join('corpus', keytree_outfile)
     if not path.exists(dst):
         print('Generating keytree...')
         keytree = spelling.generate_keytree(freqs)

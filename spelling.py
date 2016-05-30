@@ -165,7 +165,7 @@ class Spelling(object):
         else:
             freqs = self.get_frequencies()
             if self.type.lower() == 'completion':
-                if len(self.query) <= self.completion_query_minlen:
+                if len(self.query) < self.completion_query_minlen:
                     return []
                 results = freqs.keys()
                 return self.complete(results, freqs, 10, self.server.keytree)
