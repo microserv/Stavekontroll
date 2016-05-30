@@ -12,11 +12,15 @@ import json
 import spelling
 import CONFIG
 
+from twisted.web.static import File
+
+from twisted.web.resource import NoResource
+
 class SpellServer(resource.Resource):
     """Receives and responds to search queries"""
     isLeaf = True
     def __init__(self,freqs,keytree):
-    
+        #super(SpellServer, self).__init__()
         #generic frequency dict
         self.freqs = freqs
         #buffered tree of the frequency dict
@@ -28,10 +32,19 @@ class SpellServer(resource.Resource):
         self.TTL = 60*10 #10 minutes
 
         #Stopwords for stemming/ignoring
+
         with open(path.join('nltk_data','corpora','stopwords','norwegian')) as f:
             self.stopwords = {x.strip() for x in f.readlines()}
  
         print("ONLINE")
+    def render_GET(self, request):
+        if request.uri == '/static/swagger.json':
+            with open(path.join('static', 'swagger.json')) as f:
+                s = f.read()
+            
+            return s
+        else:
+            return NoResource().render(request)
 
     def render_POST(self, request):
         request_dict = json.load(request.content)
@@ -120,7 +133,9 @@ def load_keytree(freqs, keytree_outfile='keytree.json'):
 if __name__=='__main__':
     freqs = load_frequencies()
     keytree = load_keytree(freqs)
-    site=server.Site(SpellServer(freqs,keytree)) 
+    resource = SpellServer(freqs,keytree)
+    #resource.putChild('static', File('static/'))
+    site=server.Site(resource) 
     reactor.listenTCP(CONFIG.SPELL_SERVER_PORT,site)
     reactor.run()
 
