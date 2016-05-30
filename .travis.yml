@@ -1,0 +1,15 @@
+language: python
+python:
+  - 2.7
+
+install:
+  - pip install pytest pytest-cov python-coveralls
+  - pip install -r requirements.txt
+
+script:
+  - py.test tests.py --cov=.
+
+after_success:
+  coveralls
+
+sudo: false
